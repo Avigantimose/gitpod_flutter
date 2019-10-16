@@ -7,8 +7,9 @@ ports:
 
 # List the start up tasks. You can start them in parallel in multiple terminals. See https://www.gitpod.io/docs/44_config_start_tasks/
 tasks:
-- init: flutter channel master && flutter config --enable-web && flutter precache --web --force && flutter packages get # runs during prebuild
-  command: flutter upgrade
+- before: flutter config --enable-web
+  init: flutter channel master && flutter precache --web --force && flutter packages get # runs during prebuild
+  command: flutter upgrade && flutter pub get && flutter pub upgrade
 vscode:
   extensions:
     - Dart-Code.flutter@3.5.1:0FyuzXye7dV19PNst3+Llg==

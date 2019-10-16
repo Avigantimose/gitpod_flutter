@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'arrow_tile.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -303,110 +303,100 @@ class _DismissibleArrowTileListState extends State<DismissibleArrowTileList> wit
   //   );
   // }
 
-  Widget _getDeletePrompt() {
-    return Positioned(
-      top: _draggedOffset,
-      left: widget.isActive ? 0 : null,
-      right: !widget.isActive ? 0 : null,
-      child: SlideTransition(
-        position: Tween(begin: Offset(widget.isActive ? -1 : 1, 0), end: Offset(0,0)).animate(_deletePromptController),
-        child: ArrowTile(
-          height: (_heights[_draggingId] ?? _heights[_releasedId]) - _marginLength,
-          width: _deletePromptWidth + _arrowLength,
-          margin: _getDragMargin(!widget.isActive, false),
-          strokeWidth: _strokeWidth,
-          strokeColor: FlipColor.black,
-          shadowColor: FlipColor.black,
-          elevation: 0,
-          arrowTipLength: _arrowLength,
-          backArrowTipLength: -1 * _arrowLength,
-          isBackwards: widget.isActive,
-          alignment: Alignment.topCenter,
-          color: FlipColor.red,
-          child: Icon(FontAwesomeIcons.trash, color: FlipColor.white,),
-        ),
-      ),
-    );
-  }
+  // Widget _getDeletePrompt() {
+  //   return Positioned(
+  //     top: _draggedOffset,
+  //     left: widget.isActive ? 0 : null,
+  //     right: !widget.isActive ? 0 : null,
+  //     child: SlideTransition(
+  //       position: Tween(begin: Offset(widget.isActive ? -1 : 1, 0), end: Offset(0,0)).animate(_deletePromptController),
+  //       child: ArrowTile(
+  //         height: (_heights[_draggingId] ?? _heights[_releasedId]) - _marginLength,
+  //         width: _deletePromptWidth + _arrowLength,
+  //         margin: _getDragMargin(!widget.isActive, false),
+  //         strokeWidth: _strokeWidth,
+  //         strokeColor: FlipColor.black,
+  //         shadowColor: FlipColor.black,
+  //         elevation: 0,
+  //         arrowTipLength: _arrowLength,
+  //         backArrowTipLength: -1 * _arrowLength,
+  //         isBackwards: widget.isActive,
+  //         alignment: Alignment.topCenter,
+  //         color: FlipColor.red,
+  //         child: Icon(FontAwesomeIcons.trash, color: FlipColor.white,),
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  void _elevationListener(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed) {
-      debugPrint('Released animation dismissed');
-      setState(() {
-        _releasedId = null;
-        _markHeightsForUpdate = true;
-      });
-      _elevationController.removeStatusListener(_elevationListener);
-    }
-  }
-
-  List<LayoutId> _getLayoutIdChildren(List<EntryModel> entries) => entries.map<LayoutId>((EntryModel entry) {
-    return LayoutId(
-      id: entry.id,
-      child: _GestureDismissibleArrowTile(
-        entryId: entry.id,
-        entryName: entry.name,
-        isActive: entry.isActive,
-        isDragged: entry.id == _draggingId,
-        isReleased: entry.id == _releasedId,
-        strokeWidth: _strokeWidth,
-        arrowLength: _arrowLength,
-        dragMargin: _getDragMargin(entry.isActive, entry.id == _draggingId || entry.id == _releasedId),
-        backArrowLength: (entry.id == _draggingId || entry.id == _releasedId) ? _deletePromptArrowWidthAnimation.value : 0,
-        elevationAnimation: _elevationAnimation,
-        onOverdragStart: widget.onOverdragStart,
-        onOverdragUpdate: widget.onOverdragUpdate,
-        onOverdragEnd: widget.onOverdragEnd,
-        onDismiss: () {
-          widget.setEntryStatus(
-            entryId: entry.id,
-            listId: widget.listId,
-            status: !entry.isActive
-          );
-          _verticalShiftController
-            ..reset()
-            ..forward();
-        },
-        onLongDragStart: () {
-          setState(() {
-            _draggingId = entry.id;
-            _dragExtent = 0;
-            _dragExtentModifier = 0;
-            _draggedOffset = _offsets[_draggingId];
-          });
-          _verticalShiftController
-            ..reset()
-            ..forward();
-          // _elevationController
-          //   ..reset()
-          //   ..forward();
-          // _deletePromptController
-          //   ..reset()
-          //   ..forward();
-        },
-        onVerticalLongDragStart: (){
-          // _deletePromptController.reverse();
-        },
-        onVerticalLongDragUpdate: (double delta) {
-          setState(() {
-            _dragExtent = delta;
-          });
-        },
-        onLongDragEnd: () {
-          setState(() {
-            _releasedId = _draggingId;
-            _draggingId = null;
-            _dragExtent = 0;
-            _dragExtentModifier = 0;
-          });
-          // _deletePromptController.reverse();
-          _verticalShiftController.reverse();
-          // _elevationController.reverse();
-          // _elevationController.addStatusListener(_elevationListener);
-        },
-      ),
-    );
-  }).toList();
+  // List<LayoutId> _getLayoutIdChildren(List<EntryModel> entries) => entries.map<LayoutId>((EntryModel entry) {
+  //   return LayoutId(
+  //     id: entry.id,
+  //     child: _GestureDismissibleArrowTile(
+  //       entryId: entry.id,
+  //       entryName: entry.name,
+  //       isActive: entry.isActive,
+  //       isDragged: entry.id == _draggingId,
+  //       isReleased: entry.id == _releasedId,
+  //       strokeWidth: _strokeWidth,
+  //       arrowLength: _arrowLength,
+  //       // dragMargin: _getDragMargin(entry.isActive, entry.id == _draggingId || entry.id == _releasedId),
+  //       dragMargin: EdgeInsets.all(8.0),
+  //       backArrowLength: (entry.id == _draggingId || entry.id == _releasedId) ? _deletePromptArrowWidthAnimation.value : 0,
+  //       elevationAnimation: AlwaysStoppedAnimation(0.0),
+  //       onOverdragStart: widget.onOverdragStart,
+  //       onOverdragUpdate: widget.onOverdragUpdate,
+  //       onOverdragEnd: widget.onOverdragEnd,
+  //       onDismiss: () {
+  //         widget.setEntryStatus(
+  //           entryId: entry.id,
+  //           listId: widget.listId,
+  //           status: !entry.isActive
+  //         );
+  //         _verticalShiftController
+  //           ..reset()
+  //           ..forward();
+  //       },
+  //       onLongDragStart: () {
+  //         setState(() {
+  //           _draggingId = entry.id;
+  //           _dragExtent = 0;
+  //           _dragExtentModifier = 0;
+  //           _draggedOffset = _offsets[_draggingId];
+  //         });
+  //         _verticalShiftController
+  //           ..reset()
+  //           ..forward();
+  //         // _elevationController
+  //         //   ..reset()
+  //         //   ..forward();
+  //         // _deletePromptController
+  //         //   ..reset()
+  //         //   ..forward();
+  //       },
+  //       onVerticalLongDragStart: (){
+  //         // _deletePromptController.reverse();
+  //       },
+  //       onVerticalLongDragUpdate: (double delta) {
+  //         setState(() {
+  //           _dragExtent = delta;
+  //         });
+  //       },
+  //       onLongDragEnd: () {
+  //         setState(() {
+  //           _releasedId = _draggingId;
+  //           _draggingId = null;
+  //           _dragExtent = 0;
+  //           _dragExtentModifier = 0;
+  //         });
+  //         // _deletePromptController.reverse();
+  //         _verticalShiftController.reverse();
+  //         // _elevationController.reverse();
+  //         // _elevationController.addStatusListener(_elevationListener);
+  //       },
+  //     ),
+  //   );
+  // }).toList();
 
   @override
   Widget build(BuildContext context) {
@@ -448,16 +438,16 @@ class _DismissibleArrowTileListState extends State<DismissibleArrowTileList> wit
             ..forward();
         }
       ),
-      children: _getLayoutIdChildren(widget.entries)
+      // children: _getLayoutIdChildren(widget.entries)
     );
 
     List<Widget> children = [multiChildLayout];
     // if (_draggingId != null) children.add(_getDeletePrompt(_draggingId));
     // if (_releasedId != null) children.add(_getDeletePrompt(_releasedId));
 
-    return Stack(
+    return Container(
       alignment: Alignment.center,
-      children: children,
+      child: Text('test'),
     );
   }
 
