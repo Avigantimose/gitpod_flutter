@@ -2,6 +2,8 @@
 
 A new Flutter project.
 
+` flutter run -d headless-server --web-port=8080`
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
