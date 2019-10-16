@@ -9,13 +9,11 @@ class ArrowTile extends StatefulWidget {
   final Alignment alignment;
   final double width;
   final double height;
-  final double elevation;
   final double arrowTipLength;
   final double backArrowTipLength;
   final double strokeWidth;
   final Color color;
   final Color strokeColor;
-  final Color shadowColor;
   final Widget child;
 
   ArrowTile({
@@ -27,25 +25,21 @@ class ArrowTile extends StatefulWidget {
     this.alignment = Alignment.centerLeft,
     this.width,
     this.height,
-    @required this.elevation,
     @required this.arrowTipLength,
     @required this.backArrowTipLength,
     @required this.strokeWidth,
     @required this.color,
     @required this.strokeColor,
-    @required this.shadowColor,
   }) :
     assert(isBackwards != null),
     assert(margin != null),
     assert(padding != null),
     assert(alignment != null),
-    assert(elevation != null),
     assert(arrowTipLength != null),
     assert(backArrowTipLength != null),
     assert(strokeWidth != null),
     assert(color != null),
     assert(strokeColor != null),
-    assert(shadowColor != null),
     super(key: key);
 
   @override
@@ -56,6 +50,22 @@ class ArrowTile extends StatefulWidget {
 }
 
 class ArrowTileState extends State<ArrowTile> {
+  ArrowTilePainter arrowTilePainter;
+
+  @override
+  void initState() {
+    super.initState();
+    arrowTilePainter = ArrowTilePainter(
+      isBackwards: widget.isBackwards,
+      arrowTipLength: widget.arrowTipLength,
+      backArrowTipLength: widget.backArrowTipLength,
+      color: widget.color,
+      strokeColor: widget.strokeColor,
+      shadowColor: const Color.fromRGBO(0, 0, 0, 1),
+      strokeWidth: widget.strokeWidth,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget arrowTile = Container(
@@ -64,17 +74,7 @@ class ArrowTileState extends State<ArrowTile> {
       width: widget.width,
       height: widget.height,
       child: CustomPaint(
-        painter: ArrowTilePainter(
-          isBackwards: widget.isBackwards,
-          arrowTipLength: widget.arrowTipLength,
-          backArrowTipLength: widget.backArrowTipLength,
-          color: widget.color,
-          strokeColor: widget.strokeColor,
-          shadowColor: widget.shadowColor,
-          strokeWidth: widget.strokeWidth,
-          elevation: widget.elevation,
-          transparentOccluder: true
-        ),
+        painter: arrowTilePainter,
         isComplex: false,
         willChange: false,
         child: Container(
@@ -94,14 +94,12 @@ class ArrowTileState extends State<ArrowTile> {
 
 class ArrowTilePainter extends CustomPainter{
   final bool isBackwards;
-  final double elevation;
   final double arrowTipLength;
   final double backArrowTipLength;
   final Color color;
   final Color shadowColor;
   final Color strokeColor;
   final double strokeWidth;
-  final bool transparentOccluder;
 
   Path arrowPath = Path();
   Paint linePaint = Paint();
@@ -115,8 +113,6 @@ class ArrowTilePainter extends CustomPainter{
     @required this.strokeColor,
     @required this.shadowColor,
     @required this.strokeWidth,
-    @required this.elevation,
-    @required this.transparentOccluder,
   }){
     fillPaint.style = PaintingStyle.fill;
     fillPaint.color = color;
@@ -185,7 +181,6 @@ class ArrowTilePainter extends CustomPainter{
       ..lineTo(backArrowPoint, arrowHalfHeight)
       ..close();
     canvas
-      ..drawShadow(arrowPath, shadowColor, elevation, transparentOccluder)
       ..drawPath(arrowPath, fillPaint)
       ..drawPath(arrowPath, linePaint);
   }
@@ -198,7 +193,5 @@ class ArrowTilePainter extends CustomPainter{
     || isBackwards != oldDelegate.isBackwards
     || color != oldDelegate.color
     || strokeColor != oldDelegate.strokeColor
-    || elevation != oldDelegate.elevation
-    || transparentOccluder != oldDelegate.transparentOccluder
     || shadowColor != oldDelegate.shadowColor;
 }
