@@ -28,7 +28,10 @@ class GestureArrow extends StatefulWidget {
 
 class _GestureArrowState extends State<GestureArrow> {
   static const double _slop = 8;
-  
+
+  bool isHorizontalLongDrag = false;
+  bool isVerticalLongDrag = false;
+
   @override
   Widget build(BuildContext context) {
     ArrowTile arrowTile = ArrowTile(
@@ -61,11 +64,48 @@ class _GestureArrowState extends State<GestureArrow> {
   }
 
   void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    if (isVerticalLongDrag && isHorizontalLongDrag) throw FlutterError('GestureArrow is both vertical long dragging and horizontal long dragging');
+    else if (isVerticalLongDrag) _onLongVerticalDragUpdate(details);
+    else if (isHorizontalLongDrag) _onLongHorizontalDragUpdate(details);
+    else {
+      double dxAbs = details.localOffsetFromOrigin.dx.abs();
+      double dyAbs = details.localOffsetFromOrigin.dy.abs();
+      bool horizontalDrag = dxAbs > _slop;
+      bool verticalDrag = dyAbs > _slop;
 
+      void _startLongHorizontalDrag() {
+        setState(() {
+          isHorizontalLongDrag = true;
+        });
+        _onLongHorizontalDragStart();
+        _onLongHorizontalDragUpdate(details);
+      }
+      void _startLongVerticalDrag() {
+        setState(() {
+          isVerticalLongDrag = true;
+        });
+        _onLongVerticalDragStart();
+        _onLongVerticalDragUpdate(details);
+      }
+
+      if (horizontalDrag && verticalDrag) {
+        if (dxAbs > dyAbs) {
+          _startLongHorizontalDrag();
+        } else {
+          _startLongVerticalDrag();
+        }
+      } else if (horizontalDrag) {
+        _startLongHorizontalDrag();
+      } else if (verticalDrag) {
+        _startLongVerticalDrag();
+      }
+    }
   }
 
   void _onLongPressEnd(LongPressEndDetails details) {
-
+    if (isHorizontalLongDrag) _onLongHorizontalDragEnd(details);
+    else if (isVerticalLongDrag) _onLongVerticalDragEnd(details);
+    
   }
 
   void _onVerticalDragStart(DragStartDetails details) {
@@ -96,11 +136,11 @@ class _GestureArrowState extends State<GestureArrow> {
 
   }
 
-  void _onLongHorizontalDragUpdate(DragUpdateDetails details) {
+  void _onLongHorizontalDragUpdate(LongPressMoveUpdateDetails details) {
 
   }
 
-  void _onLongHorizontalDragEnd(DragEndDetails details) {
+  void _onLongHorizontalDragEnd(LongPressEndDetails details) {
 
   }
 
@@ -108,11 +148,11 @@ class _GestureArrowState extends State<GestureArrow> {
 
   }
 
-  void _onLongVerticalDragUpdate(DragUpdateDetails details) {
+  void _onLongVerticalDragUpdate(LongPressMoveUpdateDetails details) {
 
   }
 
-  void _onLongVerticalDragEnd(DragEndDetails details) {
+  void _onLongVerticalDragEnd(LongPressEndDetails details) {
 
   }
 }
