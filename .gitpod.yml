@@ -9,3 +9,7 @@ ports:
 tasks:
 - init: flutter channel master && flutter config --enable-web && flutter precache --web --force # runs during prebuild
   command: flutter upgrade
+vscode:
+  extensions:
+    - Dart-Code.flutter@3.5.1:0FyuzXye7dV19PNst3+Llg==
+    - Dart-Code.dart-code@3.5.1:W6zqgIED1gxtkBH/pbfGXA==
