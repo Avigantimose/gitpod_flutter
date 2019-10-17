@@ -3,6 +3,10 @@ import 'arrow_tile.dart';
 import 'colors.dart';
 
 class GestureArrow extends StatefulWidget {
+  final double width;
+  final double height;
+  final EdgeInsets margin;
+  final EdgeInsets padding;
   final bool isBackwards;
   final Color color;
   final Color strokeColor;
@@ -10,8 +14,6 @@ class GestureArrow extends StatefulWidget {
   final double arrowTipLength;
   final double backArrowTipLength;
   final Duration duration;
-  final void Function(double elevation, AnimationStatus status) updateElevationStatus;
-  final void Function(double elevation)           updateElevation;
   final void Function()                           onTap;
   final void Function()                           onHorizontalDragStart;
   final void Function(DragUpdateDetails)          onHorizontalDragUpdate;
@@ -28,11 +30,14 @@ class GestureArrow extends StatefulWidget {
   final void Function()                           onLongVerticalDragStart;
   final void Function(LongPressMoveUpdateDetails) onLongVerticalDragUpdate;
   final void Function(LongPressEndDetails)        onLongVerticalDragEnd;
+  final Widget child;
 
   GestureArrow({
     @required this.isBackwards,
-    this.updateElevation,
-    this.updateElevationStatus,
+    this.width,
+    this.height,
+    this.margin,
+    this.padding,
     this.onTap,
     this.onLongPress,
     this.onLongPressMoveUpdate,
@@ -55,6 +60,7 @@ class GestureArrow extends StatefulWidget {
     this.arrowTipLength = 32,
     this.backArrowTipLength = 0,
     this.duration = const Duration(milliseconds: 300),
+    this.child,
   });
   @override
   State<GestureArrow> createState() {
@@ -62,47 +68,25 @@ class GestureArrow extends StatefulWidget {
   }
 }
 
-class _GestureArrowState extends State<GestureArrow> with SingleTickerProviderStateMixin {
+class _GestureArrowState extends State<GestureArrow> {
   static const double _slop = 8;
-
   bool isHorizontalLongDrag = false;
   bool isVerticalLongDrag = false;
-  AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
-    _controller.addListener(() {
-      if (widget.updateElevation != null) {
-        widget.updateElevation(_controller.value);
-      }
-    });
-    _controller.addStatusListener((AnimationStatus status) {
-      if (widget.updateElevationStatus != null) {
-        widget.updateElevationStatus(_controller.value, status);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     ArrowTile arrowTile = ArrowTile(
+      width: widget.width,
+      height: widget.height,
+      margin: widget.margin,
+      padding: widget.padding,
       color: widget.color,
       strokeColor: widget.strokeColor,
       strokeWidth: widget.strokeWidth,
       isBackwards: widget.isBackwards,
       arrowTipLength: widget.arrowTipLength,
       backArrowTipLength: widget.backArrowTipLength,
+      child: widget.child,
     );
 
     GestureDetector detector = GestureDetector(
@@ -124,7 +108,6 @@ class _GestureArrowState extends State<GestureArrow> with SingleTickerProviderSt
 
   void _onLongPress() {
     if (widget.onLongPress != null) widget.onLongPress();
-    _controller.forward();
   }
 
   void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
@@ -172,7 +155,6 @@ class _GestureArrowState extends State<GestureArrow> with SingleTickerProviderSt
     else if (isVerticalLongDrag) _onLongVerticalDragEnd(details);
 
     if (widget.onLongPressEnd != null) widget.onLongPressEnd(details);
-    _controller.reverse();
   }
 
   void _onVerticalDragStart(DragStartDetails details) {

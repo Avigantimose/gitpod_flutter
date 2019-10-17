@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'colors.dart';
 import 'dismissible_arrow_tile.dart';
+import 'gesture_arrow.dart';
 import 'models.dart';
 
 typedef OnDragChange = void Function({int direction, String entryId, double height});
@@ -447,7 +448,11 @@ class _DismissibleArrowTileListState extends State<DismissibleArrowTileList> wit
 
     return Container(
       alignment: Alignment.center,
-      child: Text('test'),
+      child: GestureArrow(
+        isBackwards: false,
+        height: 100,
+        child: Text('test'),
+      ),
     );
   }
 
