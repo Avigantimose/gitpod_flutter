@@ -6,14 +6,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'colors.dart';
-import 'dismissible_arrow_tile.dart';
+// import 'dismissible_arrow_tile.dart';
 import 'gesture_arrow.dart';
 import 'models.dart';
 
 typedef OnDragChange = void Function({int direction, String entryId, double height});
 typedef UpdateOffsets = void Function(Map<String, double> offsets);
 typedef UpdateHeights = void Function(Map<String, double> heights);
-
 typedef OnLongHoldStart = void Function();
 typedef OnLongHoldUpdate = void Function();
 typedef OnLongHoldEnd = void Function();
@@ -206,36 +205,36 @@ class _GestureDismissibleArrowTileState extends State<_GestureDismissibleArrowTi
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Widget dismissibleArrowTile = DismissibleArrowTile(
-      key: Key(widget.entryId),
-      isBackwards: !widget.isActive,
-      color: FlipColor.white1,
-      strokeColor: FlipColor.black,
-      strokeWidth: widget.strokeWidth,
-      shadowColor: FlipColor.black,
-      elevation: widget.isDragged || widget.isReleased ? widget.elevationAnimation.value : 0,
-      arrowTipLength: widget.arrowLength,
-      backArrowTipLength: widget.backArrowLength,
-      margin: widget.dragMargin,
-      height: widget.height,
-      overdragStart: widget.onOverdragStart,
-      overdragUpdate: widget.onOverdragUpdate,
-      overdragDone: widget.onOverdragEnd,
-      dismiss: widget.onDismiss,
-      child: Text(widget.entryName),
-    );
+  // @override
+  // Widget build(BuildContext context) {
+    // Widget dismissibleArrowTile = DismissibleArrowTile(
+    //   key: Key(widget.entryId),
+    //   isBackwards: !widget.isActive,
+    //   color: FlipColor.white1,
+    //   strokeColor: FlipColor.black,
+    //   strokeWidth: widget.strokeWidth,
+    //   shadowColor: FlipColor.black,
+    //   elevation: widget.isDragged || widget.isReleased ? widget.elevationAnimation.value : 0,
+    //   arrowTipLength: widget.arrowLength,
+    //   backArrowTipLength: widget.backArrowLength,
+    //   margin: widget.dragMargin,
+    //   height: widget.height,
+    //   overdragStart: widget.onOverdragStart,
+    //   overdragUpdate: widget.onOverdragUpdate,
+    //   overdragDone: widget.onOverdragEnd,
+    //   dismiss: widget.onDismiss,
+    //   child: Text(widget.entryName),
+    // );
 
-    Widget gesturedDismissibleArrowTile = GestureDetector(
-      onLongPressStart: onLongDragStart,
-      onLongPressMoveUpdate: onLongPressMoveUpdate,
-      onLongPressEnd: onLongDragEnd,
-      child: dismissibleArrowTile,
-    );
+    // Widget gesturedDismissibleArrowTile = GestureDetector(
+    //   onLongPressStart: onLongDragStart,
+    //   onLongPressMoveUpdate: onLongPressMoveUpdate,
+    //   onLongPressEnd: onLongDragEnd,
+    //   child: dismissibleArrowTile,
+    // );
 
-    return gesturedDismissibleArrowTile;
-  }
+  //   return gesturedDismissibleArrowTile;
+  // }
 
 }
 

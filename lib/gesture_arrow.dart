@@ -2,6 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'arrow_tile.dart';
 import 'colors.dart';
 
+typedef OnOverdragStart = void Function();
+typedef OnOverdragUpdate = void Function(double drag);
+typedef OnOverdragEnd = void Function();
+typedef OnDismissed = void Function();
+
 class GestureArrow extends StatefulWidget {
   final double width;
   final double height;
@@ -33,6 +38,7 @@ class GestureArrow extends StatefulWidget {
   final Widget child;
 
   GestureArrow({
+    @required Key key,
     @required this.isBackwards,
     this.width,
     this.height,
@@ -61,7 +67,8 @@ class GestureArrow extends StatefulWidget {
     this.backArrowTipLength = 0,
     this.duration = const Duration(milliseconds: 300),
     this.child,
-  });
+  }) : super(key: key);
+
   @override
   State<GestureArrow> createState() {
     return _GestureArrowState();
