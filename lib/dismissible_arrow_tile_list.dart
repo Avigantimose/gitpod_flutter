@@ -448,6 +448,7 @@ class _DismissibleArrowTileListState extends State<DismissibleArrowTileList> wit
 
     return Container(
       alignment: Alignment.center,
+      margin: EdgeInsets.all(16),
       child: GestureArrow(
         isBackwards: false,
         height: 100,
