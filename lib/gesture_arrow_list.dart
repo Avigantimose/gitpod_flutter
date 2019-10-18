@@ -42,7 +42,13 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     super.initState();
     _delegate = _GestureArrowListLayoutDelegate(
       entries: widget.entries,
-      
+      onDragChange: (int direction, String entryId) {
+        widget.moveEntry(
+          listId: widget.listId,
+          entryId: entryId,
+          direction: direction,
+        );
+      }
     );
   }
 
@@ -54,20 +60,44 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
   }
 }
 
-typedef OnDragChange = void Function({int direction, String entryId, double height});
+typedef OnDragChange = void Function(int direction, String entryId);
 
 class _GestureArrowListLayoutDelegate extends MultiChildLayoutDelegate {
-  List<EntryModel> entries;
-  OnDragChange onDragChange;
+  final List<EntryModel> entries;
+  final OnDragChange onDragChange;
+  final String draggingId;
+
+  Map<String, Size> sizes;
 
   _GestureArrowListLayoutDelegate({
     @required this.entries,
     @required this.onDragChange,
-  });
+    this.draggingId,
+  }) {
+    sizes = Map();
+  }
 
   @override
   void performLayout(Size size) {
-    // TODO: implement performLayout
+    List<String> ids = entries.map((EntryModel entry) => entry.id);
+    if (draggingId != null) {
+      bool foundDraggingId = ids.remove(draggingId);
+      if (!foundDraggingId) {
+        throw FlutterError("Dragging id $draggingId not found in entries");
+      }
+      ids.insert(0, draggingId);
+    }
+
+    for (String id in ids) {
+      Size childSize = layoutChild(id, BoxConstraints(
+        minWidth: size.width,
+        maxWidth: size.width,
+        minHeight: 0,
+        maxHeight: double.infinity,
+      ));
+      sizes[id] = childSize;
+      
+    }
   }
 
   @override
