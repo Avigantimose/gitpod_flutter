@@ -3,6 +3,7 @@ import 'arrow_tile.dart';
 import 'colors.dart';
 
 class GestureArrow extends StatefulWidget {
+  static const double _edgeLength = 8;
   final double width;
   final double height;
   final EdgeInsets margin;
@@ -36,8 +37,8 @@ class GestureArrow extends StatefulWidget {
     @required this.isBackwards,
     this.width,
     this.height,
-    this.margin,
-    this.padding,
+    this.margin = const EdgeInsets.all(_edgeLength),
+    this.padding = const EdgeInsets.all(_edgeLength),
     this.onTap,
     this.onLongPress,
     this.onLongPressMoveUpdate,
