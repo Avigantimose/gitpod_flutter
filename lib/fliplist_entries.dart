@@ -1,4 +1,3 @@
-import 'dismissible_arrow_tile_list.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'robapp.dart';
@@ -164,27 +163,6 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
     );
   }
 
-  Widget _getDismissibleArrowTileList(bool isActive) {
-    return DismissibleArrowTileList(
-      listId: widget.listId,
-      entries: isActive ? widget.activeEntries : widget.inactiveEntries,
-      isActive: isActive,
-      setEntryStatus: widget.setEntryStatus,
-      createNewEntry: widget.createNewEntry,
-      deleteEntry: widget.deleteEntry,
-      moveEntry: widget.moveEntry,
-      onOverdragStart: () => setState(() {
-        _scrollPhysics = NeverScrollableScrollPhysics();
-      }),
-      onOverdragUpdate: (double delta) => setState((){
-        _scrollController.jumpTo(-delta);
-      }),
-      onOverdragEnd: () => setState((){
-        _scrollPhysics = PageScrollPhysics();
-      }),
-    );
-  }
-
   Widget _getEntries(BuildContext context) {
     return Scrollable(
       axisDirection: AxisDirection.right,
@@ -196,9 +174,8 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
           offset: position,
           slivers: <Widget>[SliverFillViewport(
             delegate: SliverChildListDelegate([
-              _getDismissibleArrowTileList(true),
-              _getDismissibleArrowTileList(false)
-              ,
+              Center(child: Text('Active entries'),),
+              Center(child: Text('InactiveEntries'),)
             ]),
           )],
         );
