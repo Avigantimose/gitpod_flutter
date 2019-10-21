@@ -39,11 +39,14 @@ class _FliplistAppState extends State<FliplistApp> {
     _appView = FliplistAppViewModel();
     String entryId = _appView.addNewFliplist('Test List');
     _appView.getFliplist(entryId)
-      ..addEntry('Test Entry 1', true)
-      ..addEntry('Test Entry 2', true)
-      ..addEntry('Test Entry 3', true)
-      ..addEntry('Test Entry 4', true)
-      ..addEntry('Test Entry 5', true);
+      ..addEntry('Test Active 1', true)
+      ..addEntry('Test Active 2', true)
+      ..addEntry('Test Active 3', true)
+      ..addEntry('Test Active 4', true)
+      ..addEntry('Test Active 5', true)
+      ..addEntry('Test Inactive 1', false)
+      ..addEntry('Test Inactive 2', false)
+      ..addEntry('Test Inactive 3', false);
   }
 
   void _showNewListDialog(BuildContext context) {

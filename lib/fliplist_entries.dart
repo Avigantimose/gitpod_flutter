@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'robapp.dart';
 import 'colors.dart';
 import 'models.dart';
+import 'gesture_arrow_list.dart';
 
 /// The individual entries of a list.
 ///
@@ -163,6 +164,18 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
     );
   }
 
+  Widget _getGestureArrowList(bool isActive) {
+    return GestureArrowList(
+      listId: widget.listId,
+      isActive: isActive,
+      entries: isActive ? widget.activeEntries : widget.inactiveEntries,
+      setEntryStatus: widget.setEntryStatus,
+      createNewEntry: widget.createNewEntry,
+      deleteEntry: widget.deleteEntry,
+      moveEntry: widget.moveEntry,
+    );
+  }
+
   Widget _getEntries(BuildContext context) {
     return Scrollable(
       axisDirection: AxisDirection.right,
@@ -174,8 +187,8 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
           offset: position,
           slivers: <Widget>[SliverFillViewport(
             delegate: SliverChildListDelegate([
-              Center(child: Text('Active entries'),),
-              Center(child: Text('InactiveEntries'),)
+              _getGestureArrowList(true),
+              _getGestureArrowList(false),
             ]),
           )],
         );

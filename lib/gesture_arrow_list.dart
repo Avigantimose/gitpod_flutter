@@ -17,13 +17,13 @@ class GestureArrowList extends StatefulWidget {
   final bool isActive;
 
   GestureArrowList({
-    this.listId,
-    this.isActive,
-    this.entries,
-    this.setEntryStatus,
-    this.createNewEntry,
-    this.deleteEntry,
-    this.moveEntry,
+    @required this.listId,
+    @required this.isActive,
+    @required this.entries,
+    @required this.setEntryStatus,
+    @required this.createNewEntry,
+    @required this.deleteEntry,
+    @required this.moveEntry,
     this.onOverdragEnd,
     this.onOverdragUpdate,
     this.onOverdragStart,
@@ -73,16 +73,27 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
       else return 0;
     });
 
-    return widget.entries.map((EntryModel entry) {
-      LayoutId(
+    List<Widget> children = widget.entries.map((EntryModel entry) {
+      return LayoutId(
         id: entry.id,
         child: GestureArrow(
           key: Key(entry.id),
           isBackwards: !entry.isActive,
           child: Text(entry.name),
+          onHorizontalDragStart: () {
+
+          },
+          onHorizontalDragUpdate: (DragUpdateDetails details) {
+
+          },
+          onHorizontalDragEnd: (DragEndDetails details) {
+
+          },
         ),
       );
     }).toList();
+
+    return children;
   }
 
   @override
@@ -99,14 +110,12 @@ typedef OnDragChange = void Function(int direction, String entryId);
 class _GestureArrowListLayoutDelegate extends MultiChildLayoutDelegate {
   final List<EntryModel> entries;
   final OnDragChange onDragChange;
-  final String draggingId;
 
   Map<String, Size> sizes;
 
   _GestureArrowListLayoutDelegate({
     @required this.entries,
     @required this.onDragChange,
-    this.draggingId,
   }) {
     sizes = Map();
   }
@@ -128,13 +137,12 @@ class _GestureArrowListLayoutDelegate extends MultiChildLayoutDelegate {
       positionChild(entry.id, Offset(0, runningHeight));
       runningHeight += childSize.height;
     }
-
   }
 
   @override
   bool shouldRelayout(_GestureArrowListLayoutDelegate oldDelegate) {
-    return this.entries == oldDelegate.entries
-        || this.onDragChange == oldDelegate.onDragChange;
+    return this.entries != oldDelegate.entries &&
+      this.onDragChange != oldDelegate.onDragChange;
   }
 
 }
