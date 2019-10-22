@@ -42,6 +42,7 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
   MultiChildLayoutDelegate _delegate;
   Map<String, Animation<double>> _elevations = Map();
   Map<String, AnimationController> _sizeControllers = Map();
+  Map<String, AnimationController> _slideControllers = Map();
 
   @override
   void initState() {
@@ -112,12 +113,14 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     String entryId,
     bool isActive,
   ) {
-    AnimationController controller = AnimationController(
+    _slideControllers[entryId] = AnimationController(
       vsync: this,
-      duration: widget.dismissDuration,
+      duration: widget.dismissDuration
     );
-    setState(() {
-      _sizeControllers[entryId] = controller;
+    _slideControllers[entryId].addListener((){
+      setState(() {
+        // Mark for rebuild
+      });
     });
   }
 
@@ -127,10 +130,7 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     DragUpdateDetails details,
     Animation<Offset> slideAnimation,
   ) {
-    debugPrint("Horizontal drag update: ${details.localPosition.dx}");
-    setState((){
-      slideAnimation = Tween(begin: Offset(details.localPosition.dx, 0)).animate(_sizeControllers[entryId]);
-    });
+    slideAnimation = _slideControllers[entryId].drive(Tween(end: Offset(details.localPosition.dx, 0)));
   }
 
   void _onHorizontalDragEnd(
@@ -141,8 +141,13 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     Animation<Offset> slideAnimation,
     Animation<double> sizeAnimation,
   ) {
-
-
+    slideAnimation = _slideControllers[entryId].drive(Tween(begin: Offset(0, 0)));
+    slideAnimation.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        _slideControllers[entryId].dispose();
+        _slideControllers[entryId] = null;
+      }
+    });
   }
 
   @override

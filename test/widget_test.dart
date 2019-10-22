@@ -6,6 +6,23 @@ import 'package:gitpod_flutter/gesture_arrow_list.dart';
 import 'package:gitpod_flutter/fliplist_entries.dart';
 import 'package:gitpod_flutter/models.dart';
 
+void _moveEntryFail({String entryId, String listId, int direction}) {
+  TestFailure("No entries should have been moved, tried to " +
+    "move entryId $entryId, listId $listId in direction $direction");
+}
+void _createNewEntryFail({String entryName, String listId, bool status}) {
+  TestFailure("No entries should have been created, tried to create a new entry " +
+    "${status ? 'active' : 'inactive'} $entryName in list $listId");
+}
+void _deleteEntryFail({String entryId, String listId}) {
+  TestFailure("No entries should be deleted, tried to delete entryId $entryId " +
+    "in list $listId");
+}
+void _setEntryStatusFail({String entryId, String listId, bool status}) {
+  TestFailure("No entries should have their value set, tried to set entryId $entryId " +
+    "to $status");
+}
+
 class _EntryModelTestView implements EntryModel {
   String id;
   int index;
@@ -70,12 +87,12 @@ void main() {
     expect(secondNameFinder, findsOneWidget);
   });
 
-  testWidgets('GestureArrow swipe to dismiss', (WidgetTester tester) async {
+  testWidgets('GestureArrow can be dragged', (WidgetTester tester) async {
     const double _screenWidth = 600;
     const double _screenHeight = 800;
     const bool _initialStatus = true;
     const String _name = 'Test Entry';
-    bool newStatus;
+    const double _dragLength = 100;
 
     Widget app = RobApp(
       body: Container(
@@ -88,79 +105,117 @@ void main() {
             name: _name,
             isActive: _initialStatus)
           ],
-          moveEntry: ({String entryId, String listId, int direction}) {
-            TestFailure("No entries should have been moved, tried to " +
-              "move entryId $entryId, listId $listId in direction $direction");
-          },
-          createNewEntry: ({String entryName, String listId, bool status}) {
-            TestFailure("No entries should have been created, tried to create a new entry " +
-              "${status ? 'active' : 'inactive'} $entryName in list $listId");
-          },
-          deleteEntry: ({String entryId, String listId}) {
-            TestFailure("No entries should be deleted, tried to delete entryID $entryId " +
-              "in list $listId");
-          },
-          setEntryStatus: ({String entryId, String listId, bool status}) {
-            newStatus = status;
-          },
+          moveEntry: _moveEntryFail,
+          createNewEntry: _createNewEntryFail,
+          deleteEntry: _deleteEntryFail,
+          setEntryStatus: _setEntryStatusFail,
         ),
       ),
     );
 
     await tester.pumpWidget(app);
+    Finder arrowFinder = find.byType(GestureArrow);
+    double initialOffset = tester.getTopLeft(arrowFinder).dx;
 
-    await tester.drag(find.byType(GestureArrow), Offset(_screenWidth - 50, 0));
+    await tester.drag(find.byType(GestureArrow), Offset(_dragLength, 0));
+    await tester.pump();
+    arrowFinder = find.byType(GestureArrow);
+    double afterOffset = tester.getTopLeft(arrowFinder).dx;
 
-    await tester.pumpAndSettle();
-
-    expect(newStatus, !_initialStatus);
+    expect(initialOffset, afterOffset - _dragLength);
   });
 
-    testWidgets('Backwards GestureArrow swipe to dismiss', (WidgetTester tester) async {
-    const double _screenWidth = 600;
-    const double _screenHeight = 800;
-    const bool _initialStatus = false;
-    const String _name = 'Test Entry';
-    bool newStatus;
+  // testWidgets('GestureArrow swipe to dismiss', (WidgetTester tester) async {
+  //   const double _screenWidth = 600;
+  //   const double _screenHeight = 800;
+  //   const bool _initialStatus = true;
+  //   const String _name = 'Test Entry';
+  //   bool newStatus;
 
-    Widget app = RobApp(
-      body: Container(
-        width:  _screenWidth,
-        height: _screenHeight,
-        child: GestureArrowList(
-          isActive: _initialStatus,
-          listId: _EntryModelTestView._listId,
-          entries: [_EntryModelTestView(
-            name: _name,
-            isActive: _initialStatus)
-          ],
-          moveEntry: ({String entryId, String listId, int direction}) {
-            TestFailure("No entries should have been moved, tried to " +
-              "move entryId $entryId, listId $listId in direction $direction");
-          },
-          createNewEntry: ({String entryName, String listId, bool status}) {
-            TestFailure("No entries should have been created, tried to create a new entry " +
-              "${status ? 'active' : 'inactive'} $entryName in list $listId");
-          },
-          deleteEntry: ({String entryId, String listId}) {
-            TestFailure("No entries should be deleted, tried to delete entryID $entryId " +
-              "in list $listId");
-          },
-          setEntryStatus: ({String entryId, String listId, bool status}) {
-            newStatus = status;
-          },
-        ),
-      ),
-    );
+  //   Widget app = RobApp(
+  //     body: Container(
+  //       width:  _screenWidth,
+  //       height: _screenHeight,
+  //       child: GestureArrowList(
+  //         isActive: _initialStatus,
+  //         listId: _EntryModelTestView._listId,
+  //         entries: [_EntryModelTestView(
+  //           name: _name,
+  //           isActive: _initialStatus)
+  //         ],
+  //         moveEntry: ({String entryId, String listId, int direction}) {
+  //           TestFailure("No entries should have been moved, tried to " +
+  //             "move entryId $entryId, listId $listId in direction $direction");
+  //         },
+  //         createNewEntry: ({String entryName, String listId, bool status}) {
+  //           TestFailure("No entries should have been created, tried to create a new entry " +
+  //             "${status ? 'active' : 'inactive'} $entryName in list $listId");
+  //         },
+  //         deleteEntry: ({String entryId, String listId}) {
+  //           TestFailure("No entries should be deleted, tried to delete entryID $entryId " +
+  //             "in list $listId");
+  //         },
+  //         setEntryStatus: ({String entryId, String listId, bool status}) {
+  //           newStatus = status;
+  //         },
+  //       ),
+  //     ),
+  //   );
 
-    await tester.pumpWidget(app);
+  //   await tester.pumpWidget(app);
 
-    await tester.drag(find.byType(GestureArrow), Offset(-_screenWidth + 50, 0));
+  //   await tester.drag(find.byType(GestureArrow), Offset(_screenWidth - 50, 0));
 
-    await tester.pumpAndSettle();
+  //   await tester.pumpAndSettle();
 
-    expect(newStatus, !_initialStatus);
-  });
+  //   expect(newStatus, !_initialStatus);
+  // });
+
+  //   testWidgets('Backwards GestureArrow swipe to dismiss', (WidgetTester tester) async {
+  //   const double _screenWidth = 600;
+  //   const double _screenHeight = 800;
+  //   const bool _initialStatus = false;
+  //   const String _name = 'Test Entry';
+  //   bool newStatus;
+
+  //   Widget app = RobApp(
+  //     body: Container(
+  //       width:  _screenWidth,
+  //       height: _screenHeight,
+  //       child: GestureArrowList(
+  //         isActive: _initialStatus,
+  //         listId: _EntryModelTestView._listId,
+  //         entries: [_EntryModelTestView(
+  //           name: _name,
+  //           isActive: _initialStatus)
+  //         ],
+  //         moveEntry: ({String entryId, String listId, int direction}) {
+  //           TestFailure("No entries should have been moved, tried to " +
+  //             "move entryId $entryId, listId $listId in direction $direction");
+  //         },
+  //         createNewEntry: ({String entryName, String listId, bool status}) {
+  //           TestFailure("No entries should have been created, tried to create a new entry " +
+  //             "${status ? 'active' : 'inactive'} $entryName in list $listId");
+  //         },
+  //         deleteEntry: ({String entryId, String listId}) {
+  //           TestFailure("No entries should be deleted, tried to delete entryID $entryId " +
+  //             "in list $listId");
+  //         },
+  //         setEntryStatus: ({String entryId, String listId, bool status}) {
+  //           newStatus = status;
+  //         },
+  //       ),
+  //     ),
+  //   );
+
+  //   await tester.pumpWidget(app);
+
+  //   await tester.drag(find.byType(GestureArrow), Offset(-_screenWidth + 50, 0));
+
+  //   await tester.pumpAndSettle();
+
+  //   expect(newStatus, !_initialStatus);
+  // });
   // testWidgets('FliplistEntries will shift its viewport when drags', (WidgetTester tester) async {
 
   // });
