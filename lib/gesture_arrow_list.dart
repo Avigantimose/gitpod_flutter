@@ -1,9 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
 import 'gesture_arrow.dart';
 import 'models.dart';
 
 class GestureArrowList extends StatefulWidget {
+  static const _defaultDuration =  const Duration(milliseconds: 300);
   final String listId;
   final SetEntryStatus setEntryStatus;
   final CreateNewEntry createNewEntry;
@@ -14,6 +16,7 @@ class GestureArrowList extends StatefulWidget {
   final OnOverdragEnd onOverdragEnd;
   final List<EntryModel> entries;
   final bool isActive;
+  final Duration dismissDuration;
 
   GestureArrowList({
     @required this.listId,
@@ -26,6 +29,7 @@ class GestureArrowList extends StatefulWidget {
     this.onOverdragEnd,
     this.onOverdragUpdate,
     this.onOverdragStart,
+    this.dismissDuration = _defaultDuration
   });
 
   @override
@@ -37,7 +41,7 @@ class GestureArrowList extends StatefulWidget {
 class _GestureArrowListState extends State<GestureArrowList> with TickerProviderStateMixin {
   MultiChildLayoutDelegate _delegate;
   Map<String, Animation<double>> _elevations = Map();
-
+  Map<String, AnimationController> _sizeControllers = Map();
 
   @override
   void initState() {
@@ -81,9 +85,12 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
         key: Key(entry.id),
         isBackwards: !entry.isActive,
         child: Text(entry.name),
-        onHorizontalDragStart: () => _onHorizontalDragStart(entry.isActive),
-        onHorizontalDragUpdate: (DragUpdateDetails details) => _onHorizontalDragUpdate(details, entry.isActive, slideAnimation),
-        onHorizontalDragEnd: (DragEndDetails details) => _onHorizontalDragEnd(details, widget.isActive, screenWidth),
+        onHorizontalDragStart: () =>
+          _onHorizontalDragStart(entry.id, entry.isActive),
+        onHorizontalDragUpdate: (DragUpdateDetails details) =>
+          _onHorizontalDragUpdate(entry.id, entry.isActive, details, slideAnimation),
+        onHorizontalDragEnd: (DragEndDetails details) =>
+          _onHorizontalDragEnd(entry.id, widget.isActive, details, screenWidth, slideAnimation, sizeAnimation),
       );
 
       return LayoutId(
@@ -101,17 +108,40 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     return children;
   }
 
-  void _onHorizontalDragStart(bool isActive) {
-
-  }
-
-  void _onHorizontalDragUpdate(DragUpdateDetails details, bool isActive, Animation<Offset> slideAnimation) {
+  void _onHorizontalDragStart(
+    String entryId,
+    bool isActive,
+  ) {
+    AnimationController controller = AnimationController(
+      vsync: this,
+      duration: widget.dismissDuration,
+    );
     setState(() {
-      slideAnimation = AlwaysStoppedAnimation(Offset(details.primaryDelta, 0));
+      _sizeControllers[entryId] = controller;
     });
   }
 
-  void _onHorizontalDragEnd(DragEndDetails details, bool isActive, double screenWidth) {
+  void _onHorizontalDragUpdate(
+    String entryId,
+    bool isActive,
+    DragUpdateDetails details,
+    Animation<Offset> slideAnimation,
+  ) {
+    debugPrint("Horizontal drag update: ${details.localPosition.dx}");
+    setState((){
+      slideAnimation = Tween(begin: Offset(details.localPosition.dx, 0)).animate(_sizeControllers[entryId]);
+    });
+  }
+
+  void _onHorizontalDragEnd(
+    String entryId,
+    bool isActive,
+    DragEndDetails details,
+    double screenWidth,
+    Animation<Offset> slideAnimation,
+    Animation<double> sizeAnimation,
+  ) {
+
 
   }
 

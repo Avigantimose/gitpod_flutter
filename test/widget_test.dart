@@ -116,7 +116,7 @@ void main() {
     expect(newStatus, !_initialStatus);
   });
 
-    testWidgets('Backwsrds GestureArrow swipe to dismiss', (WidgetTester tester) async {
+    testWidgets('Backwards GestureArrow swipe to dismiss', (WidgetTester tester) async {
     const double _screenWidth = 600;
     const double _screenHeight = 800;
     const bool _initialStatus = false;
@@ -161,7 +161,7 @@ void main() {
 
     expect(newStatus, !_initialStatus);
   });
-  testWidgets('FliplistEntries will shift its viewport when drags', (WidgetTester tester) async {
+  // testWidgets('FliplistEntries will shift its viewport when drags', (WidgetTester tester) async {
 
-  });
+  // });
 }
