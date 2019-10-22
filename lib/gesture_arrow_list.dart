@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'gesture_arrow.dart';
 import 'models.dart';
-import 'gesture_arrow.dart';
 
 class GestureArrowList extends StatefulWidget {
   final String listId;
@@ -55,7 +54,8 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     );
   }
 
-  List<Widget> _getChildren() {
+  List<Widget> _getChildren(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     // Sort by elevation
     widget.entries.sort((EntryModel entryA, EntryModel entryB){
       Animation<double> entryAElevationAnimation = _elevations[entryA.id];
@@ -74,21 +74,26 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     });
 
     List<Widget> children = widget.entries.map((EntryModel entry) {
+      Animation<double> sizeAnimation = const AlwaysStoppedAnimation(1.0);
+      Animation<Offset> slideAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
+
+      Widget gestureArrow = GestureArrow(
+        key: Key(entry.id),
+        isBackwards: !entry.isActive,
+        child: Text(entry.name),
+        onHorizontalDragStart: () => _onHorizontalDragStart(entry.isActive),
+        onHorizontalDragUpdate: (DragUpdateDetails details) => _onHorizontalDragUpdate(details, entry.isActive, slideAnimation),
+        onHorizontalDragEnd: (DragEndDetails details) => _onHorizontalDragEnd(details, widget.isActive, screenWidth),
+      );
+
       return LayoutId(
         id: entry.id,
-        child: GestureArrow(
-          key: Key(entry.id),
-          isBackwards: !entry.isActive,
-          child: Text(entry.name),
-          onHorizontalDragStart: () {
-
-          },
-          onHorizontalDragUpdate: (DragUpdateDetails details) {
-
-          },
-          onHorizontalDragEnd: (DragEndDetails details) {
-
-          },
+        child: SizeTransition(
+          sizeFactor: sizeAnimation,
+          child: SlideTransition(
+            position: slideAnimation,
+            child: gestureArrow,
+          ),
         ),
       );
     }).toList();
@@ -96,11 +101,25 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     return children;
   }
 
+  void _onHorizontalDragStart(bool isActive) {
+
+  }
+
+  void _onHorizontalDragUpdate(DragUpdateDetails details, bool isActive, Animation<Offset> slideAnimation) {
+    setState(() {
+      slideAnimation = AlwaysStoppedAnimation(Offset(details.primaryDelta, 0));
+    });
+  }
+
+  void _onHorizontalDragEnd(DragEndDetails details, bool isActive, double screenWidth) {
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomMultiChildLayout(
       delegate: _delegate,
-      children: _getChildren(),
+      children: _getChildren(context),
     );
   }
 }

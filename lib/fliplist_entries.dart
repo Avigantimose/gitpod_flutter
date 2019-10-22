@@ -44,7 +44,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  PageController _scrollController;
+  PageController pageController;
   ScrollPhysics _scrollPhysics;
 
   static const EdgeInsets _edgesAll = EdgeInsets.all(_edgeLength);
@@ -55,7 +55,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
   @override
   void initState() {
     super.initState();
-    _scrollController = PageController();
+    pageController = PageController();
     _scrollPhysics = PageScrollPhysics();
   }
 
@@ -116,7 +116,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
                         child: GestureDetector(
                           onTap: () {
                             String entryName = _textController.text;
-                            bool isActive = _scrollController.page == 0;
+                            bool isActive = pageController.page == 0;
                             widget.createNewEntry(
                               listId: widget.listId,
                               entryName: entryName,
@@ -179,7 +179,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
   Widget _getEntries(BuildContext context) {
     return Scrollable(
       axisDirection: AxisDirection.right,
-      controller: _scrollController,
+      controller: pageController,
       physics: _scrollPhysics,
       viewportBuilder: (BuildContext viewportContext, ViewportOffset position){
         return Viewport(
