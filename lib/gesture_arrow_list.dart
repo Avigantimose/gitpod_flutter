@@ -41,8 +41,6 @@ class GestureArrowList extends StatefulWidget {
 class _GestureArrowListState extends State<GestureArrowList> with TickerProviderStateMixin {
   MultiChildLayoutDelegate _delegate;
   Map<String, Animation<double>> _elevations = Map();
-  Map<String, AnimationController> _sizeControllers = Map();
-  Map<String, AnimationController> _slideControllers = Map();
 
   @override
   void initState() {
@@ -62,93 +60,39 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
   List<Widget> _getChildren(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     // Sort by elevation
-    widget.entries.sort((EntryModel entryA, EntryModel entryB){
-      Animation<double> entryAElevationAnimation = _elevations[entryA.id];
-      Animation<double> entryBElevationAnimation = _elevations[entryB.id];
+    // widget.entries.sort((EntryModel entryA, EntryModel entryB){
+    //   Animation<double> entryAElevationAnimation = _elevations[entryA.id];
+    //   Animation<double> entryBElevationAnimation = _elevations[entryB.id];
 
-      if (entryAElevationAnimation == null && entryBElevationAnimation == null) return 0;
-      else if (entryAElevationAnimation == null) return -1;
-      else if (entryBElevationAnimation == null) return 1;
+    //   if (entryAElevationAnimation == null && entryBElevationAnimation == null) return 0;
+    //   else if (entryAElevationAnimation == null) return -1;
+    //   else if (entryBElevationAnimation == null) return 1;
 
-      double entryAElevation = entryAElevationAnimation.value;
-      double entryBElevation = entryBElevationAnimation.value;
+    //   double entryAElevation = entryAElevationAnimation.value;
+    //   double entryBElevation = entryBElevationAnimation.value;
 
-      if (entryAElevation > entryBElevation) return 1;
-      else if (entryBElevation > entryAElevation) return -1;
-      else return 0;
-    });
+    //   if (entryAElevation > entryBElevation) return 1;
+    //   else if (entryBElevation > entryAElevation) return -1;
+    //   else return 0;
+    // });
 
     List<Widget> children = widget.entries.map((EntryModel entry) {
-      Animation<double> sizeAnimation = const AlwaysStoppedAnimation(1.0);
-      Animation<Offset> slideAnimation = const AlwaysStoppedAnimation(Offset(0, 0));
-
-      Widget gestureArrow = GestureArrow(
+      Widget gesturedArrow = _GesturedArrow(
         key: Key(entry.id),
         isBackwards: !entry.isActive,
+        duration: widget.dismissDuration,
         child: Text(entry.name),
-        onHorizontalDragStart: () =>
-          _onHorizontalDragStart(entry.id, entry.isActive),
-        onHorizontalDragUpdate: (DragUpdateDetails details) =>
-          _onHorizontalDragUpdate(entry.id, entry.isActive, details, slideAnimation),
-        onHorizontalDragEnd: (DragEndDetails details) =>
-          _onHorizontalDragEnd(entry.id, widget.isActive, details, screenWidth, slideAnimation, sizeAnimation),
       );
 
       return LayoutId(
         id: entry.id,
-        child: SizeTransition(
-          sizeFactor: sizeAnimation,
-          child: SlideTransition(
-            position: slideAnimation,
-            child: gestureArrow,
-          ),
-        ),
+        child: gesturedArrow,
       );
     }).toList();
 
     return children;
   }
 
-  void _onHorizontalDragStart(
-    String entryId,
-    bool isActive,
-  ) {
-    _slideControllers[entryId] = AnimationController(
-      vsync: this,
-      duration: widget.dismissDuration
-    );
-    _slideControllers[entryId].addListener((){
-      setState(() {
-        // Mark for rebuild
-      });
-    });
-  }
-
-  void _onHorizontalDragUpdate(
-    String entryId,
-    bool isActive,
-    DragUpdateDetails details,
-    Animation<Offset> slideAnimation,
-  ) {
-    slideAnimation = _slideControllers[entryId].drive(Tween(end: Offset(details.localPosition.dx, 0)));
-  }
-
-  void _onHorizontalDragEnd(
-    String entryId,
-    bool isActive,
-    DragEndDetails details,
-    double screenWidth,
-    Animation<Offset> slideAnimation,
-    Animation<double> sizeAnimation,
-  ) {
-    slideAnimation = _slideControllers[entryId].drive(Tween(begin: Offset(0, 0)));
-    slideAnimation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        _slideControllers[entryId].dispose();
-        _slideControllers[entryId] = null;
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,6 +100,101 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
       delegate: _delegate,
       children: _getChildren(context),
     );
+  }
+}
+
+class _GesturedArrow extends StatefulWidget {
+  final Key key;
+  final bool isBackwards;
+  final Widget child;
+  final Duration duration;
+
+  _GesturedArrow({
+    @required this.key,
+    @required this.isBackwards,
+    @required this.child,
+    @required this.duration,
+  }) : super(key: key);
+
+  @override
+  State<_GesturedArrow> createState() {
+    return _GesturedArrowState();
+  }
+}
+
+class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderStateMixin {
+  AnimationController slideController;
+  // AnimationController sizeController;
+
+  Animation<Offset> slideAnimation;
+  // Animation<double> sizeAnimation;
+
+  double offsetX;
+
+  @override
+  void initState() {
+    super.initState();
+    slideController = AnimationController(
+      vsync: this,
+      duration: widget.duration
+    );
+    // slideController.addListener(() => setState((){ /* Mark as dirty */ }));
+    slideAnimation = slideController.drive(Tween(begin: Offset.zero));
+
+    // sizeController = AnimationController(
+    //   vsync: this,
+    //   duration: widget.duration
+    // );
+    // sizeController.addListener(() => setState((){ /* Mark as dirty */ }));
+    // sizeAnimation = sizeController.drive(Tween(begin: 1));
+  }
+
+  @override
+  void dispose() {
+    // sizeController.dispose();
+    slideController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget arrow = GestureArrow(
+      key: widget.key,
+      isBackwards: widget.isBackwards,
+      onHorizontalDragStart: _onHorizontalDragStart,
+      onHorizontalDragUpdate: (details) => _onHorizontalDragUpdate(details, context),
+      onHorizontalDragEnd: (details) => _onHorizontalDragEnd(details, context),
+      child: widget.child,
+    );
+
+    return SlideTransition(
+      position: slideAnimation,
+      child: arrow,
+    );
+  }
+
+  void _onHorizontalDragStart() {
+    setState(() {
+      offsetX = 0;
+    });
+  }
+
+  void _onHorizontalDragUpdate(DragUpdateDetails details, BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    setState(() {
+      offsetX += details.primaryDelta;
+      slideAnimation = slideController.drive(Tween(begin: Offset(offsetX / screenWidth, 0)));
+    });
+  }
+
+  void _onHorizontalDragEnd(DragEndDetails details, BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    setState((){
+      slideAnimation = slideController.drive(Tween(
+        begin: Offset(offsetX / screenWidth, 0),
+        end: Offset.zero));
+    });
+    slideController.forward();
   }
 }
 
