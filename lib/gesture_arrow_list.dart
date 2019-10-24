@@ -57,41 +57,19 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
     );
   }
 
-  List<Widget> _getChildren(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    // Sort by elevation
-    // widget.entries.sort((EntryModel entryA, EntryModel entryB){
-    //   Animation<double> entryAElevationAnimation = _elevations[entryA.id];
-    //   Animation<double> entryBElevationAnimation = _elevations[entryB.id];
+  List<Widget> _getChildren(BuildContext context) => widget.entries.map((EntryModel entry) {
+    Widget gesturedArrow = _GesturedArrow(
+      key: Key(entry.id),
+      isBackwards: !entry.isActive,
+      duration: widget.dismissDuration,
+      child: Text(entry.name),
+    );
 
-    //   if (entryAElevationAnimation == null && entryBElevationAnimation == null) return 0;
-    //   else if (entryAElevationAnimation == null) return -1;
-    //   else if (entryBElevationAnimation == null) return 1;
-
-    //   double entryAElevation = entryAElevationAnimation.value;
-    //   double entryBElevation = entryBElevationAnimation.value;
-
-    //   if (entryAElevation > entryBElevation) return 1;
-    //   else if (entryBElevation > entryAElevation) return -1;
-    //   else return 0;
-    // });
-
-    List<Widget> children = widget.entries.map((EntryModel entry) {
-      Widget gesturedArrow = _GesturedArrow(
-        key: Key(entry.id),
-        isBackwards: !entry.isActive,
-        duration: widget.dismissDuration,
-        child: Text(entry.name),
-      );
-
-      return LayoutId(
-        id: entry.id,
-        child: gesturedArrow,
-      );
-    }).toList();
-
-    return children;
-  }
+    return LayoutId(
+      id: entry.id,
+      child: gesturedArrow,
+    );
+  }).toList();
 
 
   @override
@@ -124,11 +102,7 @@ class _GesturedArrow extends StatefulWidget {
 
 class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderStateMixin {
   AnimationController slideController;
-  // AnimationController sizeController;
-
   Animation<Offset> slideAnimation;
-  // Animation<double> sizeAnimation;
-
   double offsetX;
 
   @override
@@ -138,20 +112,11 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
       vsync: this,
       duration: widget.duration
     );
-    // slideController.addListener(() => setState((){ /* Mark as dirty */ }));
     slideAnimation = slideController.drive(Tween(begin: Offset.zero));
-
-    // sizeController = AnimationController(
-    //   vsync: this,
-    //   duration: widget.duration
-    // );
-    // sizeController.addListener(() => setState((){ /* Mark as dirty */ }));
-    // sizeAnimation = sizeController.drive(Tween(begin: 1));
   }
 
   @override
   void dispose() {
-    // sizeController.dispose();
     slideController.dispose();
     super.dispose();
   }
@@ -237,5 +202,4 @@ class _GestureArrowListLayoutDelegate extends MultiChildLayoutDelegate {
     return this.entries != oldDelegate.entries &&
       this.onDragChange != oldDelegate.onDragChange;
   }
-
 }

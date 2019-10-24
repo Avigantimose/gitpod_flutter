@@ -96,19 +96,18 @@ void main() {
           createNewEntry: _createNewEntryFail,
           deleteEntry: _deleteEntryFail,
           setEntryStatus: _setEntryStatusFail,
-          dismissDuration: Duration(milliseconds: 2000),
         ),
       ),
     );
 
     await tester.pumpWidget(app);
     final Finder arrowFinder = find.byType(GestureArrow);
-    final Offset initialArrowCenter = tester.getCenter(arrowFinder);
+    final Offset initialArrowCenter = tester.getTopLeft(arrowFinder);
+    await tester.drag(arrowFinder, Offset(dragLength, 0));
+    await tester.pump();
 
-    await tester.dragFrom(initialArrowCenter, Offset(dragLength, 0));
-    tester.
-    final Offset afterArrowCenter = tester.getCenter(arrowFinder);
+    final Offset afterArrowCenter = tester.getTopLeft(arrowFinder);
 
-    expect(initialArrowCenter.dx + dragLength, afterArrowCenter.dx);
+    expect(afterArrowCenter.dx, initialArrowCenter.dx + dragLength);
   });
 }
