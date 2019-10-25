@@ -40,7 +40,6 @@ class GestureArrowList extends StatefulWidget {
 
 class _GestureArrowListState extends State<GestureArrowList> with TickerProviderStateMixin {
   MultiChildLayoutDelegate _delegate;
-  Map<String, Animation<double>> _elevations = Map();
 
   @override
   void initState() {

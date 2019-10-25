@@ -37,43 +37,12 @@ class _EntryModelTestView implements EntryModel {
     @required this.isActive,
   }) {
     this.index = _count;
-    this.id = "test_entry_id_${_count++}";
+    this.id = "test_entry_id_num_${_count.toStringAsFixed(8)}";
+    _count++;
   }
 }
 
 void main() {
-  testWidgets('GestureArrowList displays entries', (WidgetTester tester) async {
-    const String firstName = 'Entry 1';
-    const String secondName = 'Entry 2';
-
-    List<EntryModel> entries = List();
-    entries.add(_EntryModelTestView(
-      name: firstName,
-      isActive: true
-    ));
-    entries.add(_EntryModelTestView(
-      name: secondName,
-      isActive: true,
-    ));
-
-    await tester.pumpWidget(RobApp(
-      body: GestureArrowList(
-        entries: entries,
-        isActive: true,
-        listId: _EntryModelTestView._listId,
-        setEntryStatus: null,
-        createNewEntry: null,
-        moveEntry: null,
-        deleteEntry: null,
-    )));
-
-    final firstNameFinder = find.text(firstName);
-    final secondNameFinder = find.text(secondName);
-
-    expect(firstNameFinder, findsOneWidget);
-    expect(secondNameFinder, findsOneWidget);
-  });
-
   testWidgets('GestureArrow can be dragged', (WidgetTester tester) async {
     const double screenWidth = 600;
     const double screenHeight = 800;
@@ -99,11 +68,13 @@ void main() {
         ),
       ),
     );
-
+    final int pointer = 1;
     await tester.pumpWidget(app);
     final Finder arrowFinder = find.byType(GestureArrow);
     final Offset initialArrowCenter = tester.getTopLeft(arrowFinder);
-    await tester.drag(arrowFinder, Offset(dragLength, 0));
+    TestGesture gesture = await tester.startGesture(initialArrowCenter, pointer: pointer);
+    await gesture.moveBy(Offset(dragLength, 0));
+    await gesture.up();
     await tester.pump();
 
     final Offset afterArrowCenter = tester.getTopLeft(arrowFinder);
