@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' as Gestures;
 import 'gesture_arrow.dart';
 import 'models.dart';
 
@@ -153,6 +154,11 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
 
   void _onHorizontalDragEnd(DragEndDetails details, BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    double velocity = details.primaryVelocity;
+    double minFlingVelocity = Gestures.kMinFlingVelocity;
+
+    
+
     setState((){
       slideAnimation = slideController.drive(Tween(
         begin: Offset(offsetX / screenWidth, 0),
