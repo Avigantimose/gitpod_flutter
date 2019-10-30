@@ -9,7 +9,7 @@ class GestureArrowList extends StatefulWidget {
   static const _defaultDuration =  const Duration(milliseconds: 300);
   final String listId;
   final SetEntryStatus setEntryStatus;
-  final CreateNewEntry createNewEntry;
+  final CreateNewEntry createEntry;
   final DeleteEntry deleteEntry;
   final MoveEntry moveEntry;
   final OnOverdragStart onOverdragStart;
@@ -24,7 +24,7 @@ class GestureArrowList extends StatefulWidget {
     @required this.isActive,
     @required this.entries,
     @required this.setEntryStatus,
-    @required this.createNewEntry,
+    @required this.createEntry,
     @required this.deleteEntry,
     @required this.moveEntry,
     this.onOverdragEnd,

@@ -170,7 +170,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
       isActive: isActive,
       entries: isActive ? widget.activeEntries : widget.inactiveEntries,
       setEntryStatus: widget.setEntryStatus,
-      createNewEntry: widget.createNewEntry,
+      createEntry: widget.createNewEntry,
       deleteEntry: widget.deleteEntry,
       moveEntry: widget.moveEntry,
     );

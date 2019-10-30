@@ -9,7 +9,7 @@ void _moveEntryFail({String entryId, String listId, int direction}) {
   TestFailure("No entries should have been moved, tried to "
     "move entryId $entryId, listId $listId in direction $direction");
 }
-void _createNewEntryFail({String entryName, String listId, bool status}) {
+void _createEntryFail({String entryName, String listId, bool status}) {
   TestFailure("No entries should have been created, tried to create a new entry "
     "${status ? 'active' : 'inactive'} $entryName in list $listId");
 }
@@ -42,32 +42,41 @@ class _EntryModelTestView implements EntryModel {
   }
 }
 
+Widget _getTestRobApp({
+  double screenWidth = 600,
+  double screenHeight = 800,
+  bool initialStatus = true,
+  String name = 'Test Entry',
+  void Function({String entryId, String listId, int direction}) moveEntry = _moveEntryFail,
+  void Function({String entryName, String listId, bool status}) createEntry = _createEntryFail,
+  void Function({String entryId, String listId}) deleteEntry = _deleteEntryFail,
+  void Function({String entryId, String listId, bool status}) setEntryStatus = _setEntryStatusFail,
+}) {
+  return RobApp(
+    body: Container(
+      width:  screenWidth,
+      height: screenHeight,
+      child: GestureArrowList(
+        isActive: initialStatus,
+        listId: _EntryModelTestView._listId,
+        entries: [_EntryModelTestView(
+          name: name,
+          isActive: initialStatus)
+        ],
+        moveEntry: _moveEntryFail,
+        createEntry: _createEntryFail,
+        deleteEntry: _deleteEntryFail,
+        setEntryStatus: _setEntryStatusFail,
+      ),
+    ),
+  );
+}
+
 void main() {
   testWidgets('GestureArrow can be dragged', (WidgetTester tester) async {
-    const double screenWidth = 600;
-    const double screenHeight = 800;
-    const bool initialStatus = true;
-    const String name = 'Test Entry';
     const double dragLength = 200;
 
-    Widget app = RobApp(
-      body: Container(
-        width:  screenWidth,
-        height: screenHeight,
-        child: GestureArrowList(
-          isActive: initialStatus,
-          listId: _EntryModelTestView._listId,
-          entries: [_EntryModelTestView(
-            name: name,
-            isActive: initialStatus)
-          ],
-          moveEntry: _moveEntryFail,
-          createNewEntry: _createNewEntryFail,
-          deleteEntry: _deleteEntryFail,
-          setEntryStatus: _setEntryStatusFail,
-        ),
-      ),
-    );
+    Widget app = _getTestRobApp();
     await tester.pumpWidget(app);
     final Finder arrowFinder = find.byType(GestureArrow);
     final Offset initialArrowCenter = tester.getTopLeft(arrowFinder);
@@ -84,29 +93,11 @@ void main() {
     }
   });
   testWidgets('Backwards gestureArrow can be dragged', (WidgetTester tester) async {
-    const double screenWidth = 600;
-    const double screenHeight = 800;
     const bool initialStatus = false;
-    const String name = 'Test Entry';
     const double dragLength = -200;
 
-    Widget app = RobApp(
-      body: Container(
-        width:  screenWidth,
-        height: screenHeight,
-        child: GestureArrowList(
-          isActive: initialStatus,
-          listId: _EntryModelTestView._listId,
-          entries: [_EntryModelTestView(
-            name: name,
-            isActive: initialStatus)
-          ],
-          moveEntry: _moveEntryFail,
-          createNewEntry: _createNewEntryFail,
-          deleteEntry: _deleteEntryFail,
-          setEntryStatus: _setEntryStatusFail,
-        ),
-      ),
+    Widget app = _getTestRobApp(
+      initialStatus: initialStatus,
     );
     await tester.pumpWidget(app);
     final Finder arrowFinder = find.byType(GestureArrow);
@@ -124,29 +115,25 @@ void main() {
   });
 
   testWidgets('Dragged GestureArrow returns to original spot', (WidgetTester tester) async {
-    const double screenWidth = 600;
-    const double screenHeight = 800;
-    const bool initialStatus = true;
-    const String name = 'Test Entry';
     const double dragLength = 200;
 
-    Widget app = RobApp(
-      body: Container(
-        width:  screenWidth,
-        height: screenHeight,
-        child: GestureArrowList(
-          isActive: initialStatus,
-          listId: _EntryModelTestView._listId,
-          entries: [_EntryModelTestView(
-            name: name,
-            isActive: initialStatus)
-          ],
-          moveEntry: _moveEntryFail,
-          createNewEntry: _createNewEntryFail,
-          deleteEntry: _deleteEntryFail,
-          setEntryStatus: _setEntryStatusFail,
-        ),
-      ),
+    Widget app = _getTestRobApp();
+    await tester.pumpWidget(app);
+    final Finder arrowFinder = find.byType(GestureArrow);
+    final Offset initialArrowCenter = tester.getTopLeft(arrowFinder);
+    await tester.drag(arrowFinder, Offset(dragLength, 0));
+    await tester.pumpAndSettle();
+
+    final Offset afterArrowCenter = tester.getTopLeft(arrowFinder);
+    expect(afterArrowCenter.dx, initialArrowCenter.dx);
+  });
+
+  testWidgets('Backwards dragged GestureArrow returns to original spot', (WidgetTester tester) async {
+    const double dragLength = -200;
+    const bool initialStatus = false;
+
+    Widget app = _getTestRobApp(
+      initialStatus: initialStatus,
     );
     await tester.pumpWidget(app);
     final Finder arrowFinder = find.byType(GestureArrow);
@@ -156,5 +143,23 @@ void main() {
 
     final Offset afterArrowCenter = tester.getTopLeft(arrowFinder);
     expect(afterArrowCenter.dx, initialArrowCenter.dx);
+  });
+
+  testWidgets('GestureArrow in GestureArrowList will go from active to inactive when flung', (WidgetTester tester) async {
+    int timesCalled = 0;
+    void setEntryStatus({String entryId, String listId, bool status}) {
+      expect(status, false);
+      timesCalled++;
+      if (timesCalled > 1) TestFailure('SetEntryStatus should only be called once');
+    }
+    Widget app = _getTestRobApp(
+      setEntryStatus: setEntryStatus,
+    );
+    const Offset flingOffset = Offset(200, 0);
+    const double flingSpeed = 20;
+    await tester.pumpWidget(app);
+    final Finder arrowFinder = find.byType(GestureArrow);
+    await tester.fling(arrowFinder, flingOffset, flingSpeed);
+    await tester.pumpAndSettle();
   });
 }
