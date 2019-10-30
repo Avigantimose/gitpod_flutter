@@ -63,10 +63,10 @@ Widget _getTestRobApp({
           name: name,
           isActive: initialStatus)
         ],
-        moveEntry: _moveEntryFail,
-        createEntry: _createEntryFail,
-        deleteEntry: _deleteEntryFail,
-        setEntryStatus: _setEntryStatusFail,
+        moveEntry: moveEntry,
+        createEntry: createEntry,
+        deleteEntry: deleteEntry,
+        setEntryStatus: setEntryStatus,
       ),
     ),
   );

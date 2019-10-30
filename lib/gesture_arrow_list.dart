@@ -63,6 +63,13 @@ class _GestureArrowListState extends State<GestureArrowList> with TickerProvider
       isBackwards: !entry.isActive,
       duration: widget.dismissDuration,
       child: Text(entry.name),
+      onDismiss: () {
+        widget.setEntryStatus(
+          entryId: entry.id,
+          listId: widget.listId,
+          status: !entry.isActive,
+        );
+      },
     );
 
     return LayoutId(
@@ -86,12 +93,14 @@ class _GesturedArrow extends StatefulWidget {
   final bool isBackwards;
   final Widget child;
   final Duration duration;
+  final void Function() onDismiss;
 
   _GesturedArrow({
     @required this.key,
     @required this.isBackwards,
     @required this.child,
     @required this.duration,
+    @required this.onDismiss,
   }) : super(key: key);
 
   @override
@@ -157,14 +166,27 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
     double velocity = details.primaryVelocity;
     double minFlingVelocity = Gestures.kMinFlingVelocity;
 
-    
-
-    setState((){
-      slideAnimation = slideController.drive(Tween(
-        begin: Offset(offsetX / screenWidth, 0),
-        end: Offset.zero));
-    });
-    slideController.forward();
+    if (velocity > minFlingVelocity) {
+      setState(() {
+        slideAnimation = slideController.drive(Tween(
+          begin: Offset(offsetX / screenWidth, 0),
+          end: widget.isBackwards ? Offset(-1, 0) : Offset(1, 0),
+        ));
+      });
+      slideController.addStatusListener((AnimationStatus status){
+        if (status == AnimationStatus.completed) {
+          widget.onDismiss();
+        }
+      });
+      slideController.forward();
+    } else {
+      setState((){
+        slideAnimation = slideController.drive(Tween(
+          begin: Offset(offsetX / screenWidth, 0),
+          end: Offset.zero));
+      });
+      slideController.forward();
+    }
   }
 }
 
