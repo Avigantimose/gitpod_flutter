@@ -162,4 +162,24 @@ void main() {
     await tester.fling(arrowFinder, flingOffset, flingSpeed);
     await tester.pumpAndSettle();
   });
+
+  testWidgets('Backwards GestureArrow in GestureArrowList will go from inactive to active when flung', (WidgetTester tester) async {
+    int timesCalled = 0;
+    bool initialStatus = false;
+    void setEntryStatus({String entryId, String listId, bool status}) {
+      expect(status, !initialStatus);
+      timesCalled++;
+      if (timesCalled > 1) TestFailure('SetEntryStatus should only be called once');
+    }
+    Widget app = _getTestRobApp(
+      initialStatus: initialStatus,
+      setEntryStatus: setEntryStatus,
+    );
+    const Offset flingOffset = Offset(-200, 0);
+    const double flingSpeed = 20;
+    await tester.pumpWidget(app);
+    final Finder arrowFinder = find.byType(GestureArrow);
+    await tester.fling(arrowFinder, flingOffset, flingSpeed);
+    await tester.pumpAndSettle();
+  });
 }

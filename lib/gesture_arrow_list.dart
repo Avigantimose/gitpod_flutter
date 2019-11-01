@@ -147,8 +147,16 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
     );
   }
 
+  double get offsetXCapped {
+    return widget.isBackwards ?
+      offsetX > 0 ? 0 : offsetX :
+      offsetX < 0 ? 0 : offsetX;
+  }
+
   void _onHorizontalDragStart() {
+    slideController.reset();
     setState(() {
+      slideAnimation = Tween(begin: Offset.zero).animate(slideController);
       offsetX = 0;
     });
   }
@@ -157,7 +165,7 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
     double screenWidth = MediaQuery.of(context).size.width;
     setState(() {
       offsetX += details.primaryDelta;
-      slideAnimation = slideController.drive(Tween(begin: Offset(offsetX / screenWidth, 0)));
+      slideAnimation = slideController.drive(Tween(begin: Offset(offsetXCapped / screenWidth, 0)));
     });
   }
 
