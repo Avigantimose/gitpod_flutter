@@ -114,6 +114,9 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
   Animation<Offset> slideAnimation;
   double offsetX;
 
+  AnimationController shrinkController;
+  Animation<double> shrinkAnimation;
+
   @override
   void initState() {
     super.initState();
@@ -122,11 +125,17 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
       duration: widget.duration
     );
     slideAnimation = slideController.drive(Tween(begin: Offset.zero));
+    shrinkController = AnimationController(
+      vsync: this,
+      duration: widget.duration,
+    );
+    shrinkAnimation = shrinkController.drive(Tween(begin: 1));
   }
 
   @override
   void dispose() {
     slideController.dispose();
+    shrinkController.dispose();
     super.dispose();
   }
 
@@ -141,9 +150,12 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
       child: widget.child,
     );
 
-    return SlideTransition(
-      position: slideAnimation,
-      child: arrow,
+    return SizeTransition(
+      sizeFactor: shrinkAnimation,
+      child: SlideTransition(
+        position: slideAnimation,
+        child: arrow,
+      )
     );
   }
 
@@ -183,7 +195,15 @@ class _GesturedArrowState extends State<_GesturedArrow> with TickerProviderState
       });
       slideController.addStatusListener((AnimationStatus status){
         if (status == AnimationStatus.completed) {
-          widget.onDismiss();
+          setState(() {
+            shrinkAnimation = Tween(begin: 1.0, end: 0.0).animate(shrinkController);
+          });
+          shrinkController.addStatusListener((AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              widget.onDismiss();
+            }
+          });
+          shrinkController.forward();
         }
       });
       slideController.forward();
