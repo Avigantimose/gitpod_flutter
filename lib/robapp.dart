@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+const double _edgeLength = 8;
 
 class RobColor {
   static const Color white = Color(0xFFFFFFFF);
@@ -8,34 +11,24 @@ class RobColor {
   static const Color fadeGrey = Color.fromRGBO(0, 0, 0, 0.3);
 }
 
-class RobApp extends StatefulWidget {
-  final Widget body;
+class RobAppData {
   final String title;
   final Color mainColor;
+  final double topBarHeight;
+  final TextStyle textStyle;
+  final TextStyle titleTextStyle;
 
-  RobApp({
-    Key key,
-    @required this.body,
-    this.title = 'RobApp Title',
-    this.mainColor = RobColor.blue,
-  }) :  assert(body != null),
-        assert(title != null),
-        assert(mainColor != null), super(key: key);
-
-  @override
-  State<StatefulWidget> createState() {
-    return _RobAppState();
-  }
+  RobAppData({
+    this.title,
+    this.mainColor,
+    this.topBarHeight,
+    this.textStyle,
+    this.titleTextStyle,
+  });
 }
 
-class _RobAppState extends State<RobApp> {
-
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "RobApp NavigatorState");
-  final HeroController heroController = HeroController();
-  static const double _topBarHeight = 56;
-  static const double _topBarFontSize = 18;
-  static const EdgeInsetsGeometry _edges = EdgeInsets.all(8.0);
-  static const TextStyle textStyle = const TextStyle(
+class RobApp extends InheritedWidget {
+  static const TextStyle _textStyle = TextStyle(
     debugLabel: 'RobApp TextStyle',
     fontFamily: 'Roboto',
     inherit: true,
@@ -44,8 +37,8 @@ class _RobAppState extends State<RobApp> {
     fontSize: 18,
   );
 
-  static const TextStyle titleTextStyle = const TextStyle(
-    debugLabel: 'RobApp TextStyle',
+  static const TextStyle _titleTextStyle = TextStyle(
+    debugLabel: 'RobApp TitleTextStyle',
     fontFamily: 'Roboto',
     inherit: true,
     color: RobColor.black,
@@ -53,56 +46,144 @@ class _RobAppState extends State<RobApp> {
     fontSize: 24,
   );
 
-  Widget _addTopBar(Widget child) {
-    return Column(
-      children: <Widget>[
-        Container(
-          alignment: AlignmentDirectional.centerStart,
-          height: _topBarHeight,
-          color: widget.mainColor,
-          padding: _edges,
-          child: Text(widget.title, style: titleTextStyle),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(
-            alignment: AlignmentDirectional.topStart,
-            color: RobColor.white,
-            child: child,
-          )
-        )
-      ],
+  final Widget body;
+  final String title;
+  final Color mainColor;
+  final double topBarHeight;
+  final TextStyle textStyle;
+  final TextStyle titleTextStyle;
+
+  RobApp({
+    Key key,
+    @required this.body,
+    this.title = 'RobApp Title',
+    this.mainColor = RobColor.blue,
+    this.topBarHeight = 56,
+    this.textStyle = _textStyle,
+    this.titleTextStyle = _titleTextStyle,
+  }) :  assert(body != null),
+    assert(title != null),
+    assert(mainColor != null),
+    super(key: key, child: _RobApp(
+      title: title,
+      mainColor: mainColor,
+      topBarHeight: topBarHeight,
+      textStyle: textStyle,
+      titleTextStyle: titleTextStyle,
+      body: body,
+    ));
+
+  @override
+  bool updateShouldNotify(RobApp oldWidget) {
+    return title != oldWidget.title
+      || mainColor != oldWidget.mainColor
+      || topBarHeight != oldWidget.topBarHeight
+      || textStyle != oldWidget.textStyle
+      || titleTextStyle != oldWidget.titleTextStyle;
+  }
+
+  static RobAppData of(BuildContext context) {
+    RobApp robApp = context.dependOnInheritedWidgetOfExactType<RobApp>();
+    return RobAppData(
+      title: robApp.title,
+      mainColor: robApp.mainColor,
+      topBarHeight: robApp.topBarHeight,
+      textStyle: robApp.textStyle,
+      titleTextStyle: robApp.titleTextStyle,
     );
+  }
+}
+
+class _RobApp extends StatefulWidget {
+  final Widget body;
+  final String title;
+  final Color mainColor;
+  final double topBarHeight;
+  final TextStyle textStyle;
+  final TextStyle titleTextStyle;
+
+  _RobApp({
+    Key key,
+    @required this.body,
+    @required this.title,
+    @required this.mainColor,
+    @required this.topBarHeight,
+    @required this.textStyle,
+    @required this.titleTextStyle,
+  }) :  super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return _RobAppState();
+  }
+}
+
+class _RobAppState extends State<_RobApp> {
+
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: "RobApp NavigatorState");
+  final HeroController heroController = HeroController();
+  TextStyle textStyle;
+  TextStyle titleTextStyle;
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WidgetsApp(
+    Widget robApp = WidgetsApp(
       key: GlobalObjectKey(this),
       textStyle: textStyle,
       debugShowWidgetInspector: false,
       debugShowCheckedModeBanner: true,
       navigatorKey: navigatorKey,
-      color: RobColor.blue,
+      color: widget.mainColor,
       navigatorObservers: [heroController],
+      title: widget.title,
       home: widget.body,
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) => PageRouteBuilder<T>(
-        pageBuilder: (BuildContext context, Animation animation, Animation secondaryAnimation) {
-          return _addTopBar(widget.body);
-        },
-        transitionsBuilder: (BuildContext context, Animation animation, Animation secondaryAnimation, Widget child) {
-          return child;
-        },
-      ),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return PageRouteBuilder(
+          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+            return builder(context);
+          }
+        );
+      }
+    );
+    return DefaultTextStyle(
+      style: widget.textStyle,
+      child: robApp,
     );
   }
 }
 
-class RobPopupRoute extends PopupRoute {
-  @override Duration get transitionDuration => const Duration(milliseconds: 200);
-  @override Color get barrierColor => RobColor.fadeGrey;
+abstract class _RobRoute extends ModalRoute {
+  static const Duration _duration = const Duration(milliseconds: 200);
+
+  @override Duration get transitionDuration => _duration;
   @override bool get barrierDismissible => true;
-  @override String get barrierLabel => 'Dismissible Popup';
+  @override String get barrierLabel => '_RobRoute';
+  @override Color get barrierColor => RobColor.fadeGrey;
+  @override bool get maintainState => true;
+  @override bool get opaque => false;
+}
+
+class RobPageRoute extends _RobRoute {
+  final RoutePageBuilder pageBuilder;
+  final Duration transitionDuration;
+
+  RobPageRoute({
+    @required this.pageBuilder,
+    this.transitionDuration,
+  });
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return pageBuilder(context, animation, secondaryAnimation);
+  }
+}
+
+class RobPopupRoute extends _RobRoute {
   final Widget child;
 
   RobPopupRoute({@required this.child});
@@ -135,4 +216,85 @@ class RobDialog extends RobPopupRoute {
       ),
     );
   }
+}
+
+class RobAppBar extends StatelessWidget {
+  final Widget child;
+  final String title;
+  final Widget fabIcon;
+  final void Function(BuildContext) onTapFab;
+
+  RobAppBar({
+    Key key,
+    @required this.child,
+    this.title,
+    this.fabIcon,
+    this.onTapFab,
+  }) : assert((fabIcon == null) == (onTapFab == null)),
+  super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    RobAppData data = RobApp.of(context);
+    double topOSStatusBarPadding = MediaQuery.of(context).viewPadding.top;
+    Widget appBarWithChild = Container(
+      color: RobColor.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Container(
+            height: data.topBarHeight + topOSStatusBarPadding,
+            color: data.mainColor,
+            padding: EdgeInsets.only(
+              top: topOSStatusBarPadding,
+              left: _edgeLength
+            ),
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(title ?? data.title, style: data.titleTextStyle),
+          ),
+          child
+        ],
+      )
+    );
+
+    // Widget viewport = ShrinkWrappingViewport(
+    //   offset: ViewportOffset.zero(),
+    //   slivers: <Widget>[
+    //     SliverFillViewport(
+    //       delegate: SliverChildListDelegate.fixed([appBarWithChild])
+    //     )
+    //   ],
+    // );
+    
+    if (onTapFab == null) {
+      return appBarWithChild;
+      // return viewport;
+    } else {
+      return Stack(
+        children: <Widget>[
+          // viewport,
+          appBarWithChild,
+          Positioned(
+            right: _edgeLength,
+            bottom: _edgeLength,
+            child: GestureDetector(
+              onTap: () => onTapFab(context),
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: ShapeDecoration(
+                  shape: CircleBorder(),
+                  color: data.mainColor,
+                ),
+                alignment: AlignmentDirectional.center,
+                child: fabIcon,
+              ),
+            )
+          )
+        ],
+      );
+    }
+  }
+
 }

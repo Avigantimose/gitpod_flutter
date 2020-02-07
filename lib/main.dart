@@ -4,7 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'fliplist_app.dart';
 
 void main() {
-  // debugPaintSizeEnabled=true;
+  // debugPaintSizeEnabled = true;
   // timeDilation = 5;
   runApp(FliplistApp());
 }
