@@ -46,6 +46,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
 
   PageController pageController;
   ScrollPhysics _scrollPhysics;
+  ScrollController _scrollController;
 
   static const EdgeInsets _edgesAll = EdgeInsets.all(_edgeLength);
   static const EdgeInsets _edgesTopBottom = EdgeInsets.only(top: _edgeLength, bottom: _edgeLength);
@@ -57,6 +58,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
     super.initState();
     pageController = PageController();
     _scrollPhysics = PageScrollPhysics();
+    _scrollController = ScrollController(debugLabel: 'FliplistEntries scroll controller');
   }
 
   void _showNewListDialog(BuildContext context) {
@@ -182,7 +184,7 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
       controller: pageController,
       physics: _scrollPhysics,
       viewportBuilder: (BuildContext viewportContext, ViewportOffset position){
-        return Viewport(
+        return ShrinkWrappingViewport(
           axisDirection: AxisDirection.right,
           offset: position,
           slivers: <Widget>[SliverFillViewport(
@@ -198,18 +200,21 @@ class _FliplistEntriesPageState extends State<FliplistEntriesPage> with SingleTi
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          top: 0, right: 0, bottom: 0, left: 0,
-          child: _getEntries(context)
-        ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: _getAddButton(context),
-        )
-      ]
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(minHeight: viewportConstraints.maxHeight),
+          child: IntrinsicHeight(
+            child: Container(
+              color: FlipColor.red,
+              alignment: AlignmentDirectional.center,
+              height: 1000,
+              child: Text('test'),
+            ),
+          ),
+        );
+      }
     );
   }
 

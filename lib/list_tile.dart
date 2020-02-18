@@ -1,13 +1,16 @@
+import 'package:fliplist/fliplist_entries.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/animation.dart';
 import 'package:fliplist/colors.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'robapp.dart';
-import 'fliplist_entries.dart';
 import 'models.dart';
 import 'colors.dart';
+
+const double _edgeSize = 8;
 
 class ListTile extends StatefulWidget{
   static const double _tileHeight = 50;
@@ -58,35 +61,74 @@ class ListTile extends StatefulWidget{
   }
 }
 
-class _ListTileState extends State<ListTile> with SingleTickerProviderStateMixin {
-  Animation<double> heroAnimation;
+class _ListTileState extends State<ListTile> {
+  Animation<double> animation = AlwaysStoppedAnimation(0);
 
   @override
   void initState(){
     super.initState();
-
   }
 
-  Widget _backButton(BuildContext context, Function() onTap) {
+  Widget _backButton(BuildContext context, Function() onTap, Animation<double> animation) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Container(
-        alignment: Alignment.center,
-        height: widget.tileHeight,
-        width: widget.backButtonWidth,
-        child: Text("<"),
+      child: SizeTransition(
+        axis: Axis.horizontal,
+        sizeFactor: CurveTween(curve: Curves.easeInOut).animate(animation),
+        axisAlignment: 1,
+        child: Container(
+          alignment: Alignment.center,
+          height: widget.tileHeight,
+          width: widget.backButtonWidth,
+          child: Icon(FontAwesomeIcons.solidArrowAltCircleLeft),
+        )
       ),
     );
   }
 
-  Widget _getTile(BuildContext context) {
+  Widget _getTile(BuildContext context, {Animation<double> animation = const AlwaysStoppedAnimation(0)}) {
+    Widget backButtonAndListName = Row(
+      children: <Widget>[
+        _backButton(context, () => Navigator.pop(context), animation),
+        Padding(
+          padding: EdgeInsets.only(left: _edgeSize),
+          child: Text(widget.listName),
+        )
+      ],
+    );
+
+    Widget entries = FliplistEntriesPage(
+      listId: widget.listId,
+      setEntryStatus: widget.setEntryStatus,
+      createNewEntry: widget.createNewEntry,
+      deleteEntry: widget.deleteEntry,
+      moveEntry: widget.moveEntry,
+      activeEntries: widget.activeEntries,
+      inactiveEntries: widget.inactiveEntries
+    );
+
+    Widget tile = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        backButtonAndListName,
+        Expanded(
+          child: SizeTransition(
+            sizeFactor: animation,
+            child: SingleChildScrollView(
+              child: entries
+            ),
+          ),
+        ),
+      ],
+    );
+
     return Container(
-      color: FlipColor.white2,
-      child: Row(children: <Widget>[
-        _backButton(context, () => Navigator.pop(context)),
-        Text(widget.listName)
-      ],),
+      alignment: AlignmentDirectional.center,
+      padding: widget.padding,
+      height: widget.tileHeight,
+      color: FlipColor.white3,
+      child: tile,
     );
   }
 
@@ -99,14 +141,21 @@ class _ListTileState extends State<ListTile> with SingleTickerProviderStateMixin
           pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> animationSecondary) {
             return Hero(
               tag: widget.listId,
-              child: _getTile(context),
+              child: _getTile(context, animation: animation),
             );
           }
         ));
       },
-      child: Hero(
-        tag: widget.listId,
-        child: _getTile(context),
+      child: Container(
+        margin: widget.margin,
+        child: Hero(
+          tag: widget.listId,
+          child: _getTile(context),
+          flightShuttleBuilder: (BuildContext flightContext, Animation<double> animation, HeroFlightDirection flightDirection, BuildContext fromHeroContext, BuildContext toHeroContext) {
+            final Hero hero = flightDirection == HeroFlightDirection.push ? toHeroContext.widget : fromHeroContext.widget;
+            return hero.child;
+          },
+        )
       )
     );
   }

@@ -157,9 +157,8 @@ class _RobAppState extends State<_RobApp> {
   }
 }
 
-abstract class _RobRoute extends ModalRoute {
+abstract class _RobRoute {
   static const Duration _duration = const Duration(milliseconds: 200);
-
   @override Duration get transitionDuration => _duration;
   @override bool get barrierDismissible => true;
   @override String get barrierLabel => '_RobRoute';
@@ -168,27 +167,34 @@ abstract class _RobRoute extends ModalRoute {
   @override bool get opaque => false;
 }
 
-class RobPageRoute extends _RobRoute {
+class RobPageRoute<T> extends PageRoute<T> with _RobRoute {
   final RoutePageBuilder pageBuilder;
   final Duration transitionDuration;
 
   RobPageRoute({
     @required this.pageBuilder,
-    this.transitionDuration,
+    @required this.transitionDuration,
   });
 
-  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return pageBuilder(context, animation, secondaryAnimation);
+    return Column(
+      children: <Widget>[
+        Container(height: MediaQuery.of(context).viewPadding.top,),
+        Expanded(child: pageBuilder(context, animation, secondaryAnimation))
+    ],
+    );
   }
 }
 
-class RobPopupRoute extends _RobRoute {
+class RobPopupRoute<T> extends PageRoute<T> with _RobRoute {
   final Widget child;
+  final Duration duration;
 
-  RobPopupRoute({@required this.child});
+  RobPopupRoute({
+    @required this.child,
+    this.duration = _RobRoute._duration
+  });
 
-  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return FadeTransition(
       opacity: animation,
@@ -216,6 +222,39 @@ class RobDialog extends RobPopupRoute {
       ),
     );
   }
+}
+
+class RobFAB extends StatelessWidget {
+  final void Function(BuildContext) onTapFab;
+  final Color color;
+  final Widget fabIcon;
+  final double diameter;
+
+  RobFAB({
+    @required this.fabIcon,
+    this.onTapFab,
+    this.color,
+    this.diameter = 100
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Color mainColor = RobApp.of(context).mainColor;
+    return GestureDetector(
+      onTap: () => onTapFab != null ? onTapFab(context) : null,
+      child: Container(
+        width: diameter,
+        height: diameter,
+        decoration: ShapeDecoration(
+          shape: CircleBorder(),
+          color: color ?? mainColor,
+        ),
+        alignment: AlignmentDirectional.center,
+        child: fabIcon,
+      ),
+    );
+  }
+  
 }
 
 class RobAppBar extends StatelessWidget {
@@ -253,43 +292,25 @@ class RobAppBar extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: Text(title ?? data.title, style: data.titleTextStyle),
           ),
-          child
+          Expanded(
+            child: child,
+          )
         ],
       )
     );
-
-    // Widget viewport = ShrinkWrappingViewport(
-    //   offset: ViewportOffset.zero(),
-    //   slivers: <Widget>[
-    //     SliverFillViewport(
-    //       delegate: SliverChildListDelegate.fixed([appBarWithChild])
-    //     )
-    //   ],
-    // );
     
     if (onTapFab == null) {
       return appBarWithChild;
-      // return viewport;
     } else {
       return Stack(
         children: <Widget>[
-          // viewport,
           appBarWithChild,
           Positioned(
             right: _edgeLength,
             bottom: _edgeLength,
-            child: GestureDetector(
-              onTap: () => onTapFab(context),
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: ShapeDecoration(
-                  shape: CircleBorder(),
-                  color: data.mainColor,
-                ),
-                alignment: AlignmentDirectional.center,
-                child: fabIcon,
-              ),
+            child: RobFAB(
+              fabIcon: fabIcon,
+              onTapFab: onTapFab,
             )
           )
         ],

@@ -5,6 +5,6 @@ import 'fliplist_app.dart';
 
 void main() {
   // debugPaintSizeEnabled = true;
-  // timeDilation = 5;
+  // timeDilation = 10;
   runApp(FliplistApp());
 }

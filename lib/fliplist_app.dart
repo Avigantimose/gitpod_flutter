@@ -141,33 +141,43 @@ class _FliplistAppState extends State<FliplistApp> {
   }
 
   List<Widget> _getListTiles() {
-    return _appView.lists.map<Widget>((FliplistModel f) => ListTile(
-      listModel: f,
-      setEntryStatus: ({String entryId, String listId, bool status}) {
-        debugPrint("List $listId setting entry $entryId to $status");
-        setState((){
-          _appView.getFliplist(listId).setEntryStatus(entryId, status);
-        });
-      },
-      createNewEntry: ({String listId, String entryName, bool status}) {
-        debugPrint("List $listId creating entry $entryName with $status status");
-        setState((){
-          _appView.getFliplist(listId).addEntry(entryName, status);
-        });
-      },
-      deleteEntry: ({String listId, String entryId}){
-        debugPrint("List $listId deleting entry $entryId");
-        setState((){
-          _appView.getFliplist(listId).deleteEntry(entryId);
-        });
-      },
-      moveEntry: ({String listId, String entryId, int direction}) {
-        debugPrint("List $listId moving entry $entryId in $direction direction");
-        setState((){
-          _appView.getFliplist(listId).moveEntry(entryId, direction);
-        });
-      },
-    )).toList();
+    List<Widget> tiles = List();
+    for (int i = 0; i < _appView.lists.length - 1; i++) {
+      FliplistModel f = _appView.lists[i];
+      bool isLast = i == _appView.lists.length - 1;
+      EdgeInsets allMargin = EdgeInsets.only(left: _edgeSize, top: _edgeSize, right: _edgeSize);
+      EdgeInsets lastMargin = EdgeInsets.all(_edgeSize);
+
+      tiles.add(ListTile(
+        listModel: f,
+        margin: isLast ? lastMargin : allMargin,
+        setEntryStatus: ({String entryId, String listId, bool status}) {
+          debugPrint("List $listId setting entry $entryId to $status");
+          setState((){
+            _appView.getFliplist(listId).setEntryStatus(entryId, status);
+          });
+        },
+        createNewEntry: ({String listId, String entryName, bool status}) {
+          debugPrint("List $listId creating entry $entryName with $status status");
+          setState((){
+            _appView.getFliplist(listId).addEntry(entryName, status);
+          });
+        },
+        deleteEntry: ({String listId, String entryId}){
+          debugPrint("List $listId deleting entry $entryId");
+          setState((){
+            _appView.getFliplist(listId).deleteEntry(entryId);
+          });
+        },
+        moveEntry: ({String listId, String entryId, int direction}) {
+          debugPrint("List $listId moving entry $entryId in $direction direction");
+          setState((){
+            _appView.getFliplist(listId).moveEntry(entryId, direction);
+          });
+        },
+      ));
+    }
+    return tiles;
   }
 
   @override
